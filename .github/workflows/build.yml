@@ -1,0 +1,45 @@
+name: Construire le .exe Jarvis
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: jarvis-pc-new.version/jarvis-pc
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Installer les dépendances
+        run: npm install
+
+      - name: Construire le .exe
+        run: npm run dist
+
+      - name: Envoyer les .exe (onglet Actions)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Jarvis-windows
+          path: |
+            jarvis-pc-new.version/jarvis-pc/dist/Jarvis-portable.exe
+            jarvis-pc-new.version/jarvis-pc/dist/Jarvis-installation.exe
+
+      - name: Publier dans les Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Jarvis PC build ${{ github.run_number }}
+          files: |
+            jarvis-pc-new.version/jarvis-pc/dist/Jarvis-portable.exe
+            jarvis-pc-new.version/jarvis-pc/dist/Jarvis-installation.exe
