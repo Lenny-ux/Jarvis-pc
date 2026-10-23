@@ -1,0 +1,35 @@
+{
+  "name": "jarvis",
+  "productName": "Jarvis",
+  "version": "1.0.0",
+  "description": "Interface Jarvis pour PC",
+  "main": "main.js",
+  "author": "Lenny",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win --publish never"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.lenny.jarvis",
+    "productName": "Jarvis",
+    "icon": "build/icon.ico",
+    "files": ["main.js", "preload.js", "erreur.html", "build/icon.png"],
+    "win": {
+      "target": [
+        { "target": "portable", "arch": ["x64"] },
+        { "target": "nsis", "arch": ["x64"] }
+      ]
+    },
+    "portable": { "artifactName": "Jarvis-portable.exe" },
+    "nsis": {
+      "artifactName": "Jarvis-installation.exe",
+      "oneClick": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "Jarvis"
+    }
+  }
+}

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Jarvis</title>
+<style>
+  body{background:#000;color:#0ff;font-family:sans-serif;margin:0;height:100vh;display:grid;place-items:center;text-align:center}
+  h1{letter-spacing:8px;margin-bottom:8px}
+  p{color:#088}
+  input{background:#011;border:1px solid #055;color:#0ff;border-radius:6px;padding:10px;font-size:16px;width:320px}
+  button{background:none;border:1px solid #0ff;color:#0ff;border-radius:6px;padding:10px 16px;font-size:16px;cursor:pointer;margin-left:6px}
+  .orbe{width:90px;height:90px;border-radius:50%;margin:0 auto 20px;border:3px solid #0ff;box-shadow:0 0 30px #0ff8;animation:p 2s ease-in-out infinite}
+  @keyframes p{50%{transform:scale(.85);opacity:.5}}
+  small{color:#055;display:block;margin-top:30px}
+</style>
+</head>
+<body>
+<div>
+  <div class="orbe"></div>
+  <h1>J.A.R.V.I.S.</h1>
+  <p id="info"></p>
+  <form id="f"><input id="adresse"><button>Connecter</button></form>
+  <small>F11 plein écran · F5 recharger · F2 changer l'adresse</small>
+</div>
+<script>
+  const q = new URLSearchParams(location.search);
+  const adresse = q.get("adresse");
+  document.getElementById("adresse").value = adresse;
+  const reglage = q.get("reglage") === "1";
+  let n = 10;
+  const info = document.getElementById("info");
+  function maj(){
+    info.textContent = reglage ? "Adresse du serveur Jarvis :" :
+      `Connexion impossible à ${adresse} (${q.get("erreur") || "pas de réponse"}). Nouvel essai dans ${n} s…`;
+  }
+  maj();
+  if (!reglage) {
+    const t = setInterval(() => { n--; maj(); if (n <= 0) { clearInterval(t); jarvisApp.recharger(); } }, 1000);
+    document.getElementById("adresse").addEventListener("focus", () => clearInterval(t));
+  }
+  document.getElementById("f").onsubmit = e => {
+    e.preventDefault();
+    jarvisApp.changerAdresse(document.getElementById("adresse").value.trim());
+  };
+</script>
+</body>
+</html>
