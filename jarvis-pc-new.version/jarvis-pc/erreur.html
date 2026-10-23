@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Jarvis</title>
+<style>
+  *{box-sizing:border-box}
+  body{background:#000;color:#f2f2f2;font-family:"Segoe UI Variable","Segoe UI",system-ui,sans-serif;margin:0;height:100vh;overflow:hidden;
+       display:flex;flex-direction:column;align-items:center;justify-content:center;gap:46px}
+
+  /* L'orbe */
+  .scene{position:relative;width:240px;height:240px}
+  .halo{position:absolute;inset:-40px;border-radius:50%;filter:blur(50px);opacity:.55;
+        background:radial-gradient(circle at 35% 35%,#e3ec78,transparent 60%),radial-gradient(circle at 70% 65%,#ee8cd6,transparent 60%);
+        animation:respire 4s ease-in-out infinite}
+  .orbe{position:absolute;inset:0;border-radius:44%;transform:rotate(45deg);
+        background:radial-gradient(circle at 30% 25%,#fffbd0 0,#e6ef7d 22%,transparent 55%),
+                   radial-gradient(circle at 70% 70%,#d26ec8 0,#ee8cd6 30%,transparent 65%),
+                   linear-gradient(135deg,#e2ec78,#ee8cd6);
+        box-shadow:0 0 60px #ee8cd655,inset 0 0 30px #fff4;
+        animation:flotte 6s ease-in-out infinite, morph 8s ease-in-out infinite}
+  .erreur .orbe{filter:saturate(.35) brightness(.7)}
+  .erreur .halo{opacity:.2}
+  @keyframes respire{50%{transform:scale(.88);opacity:.35}}
+  @keyframes flotte{50%{translate:0 -10px}}
+  @keyframes morph{0%,100%{border-radius:44%}25%{border-radius:48% 40% 46% 42%}50%{border-radius:40% 48% 42% 46%}75%{border-radius:46% 42% 48% 40%}}
+
+  /* La carte façon verre */
+  .carte{position:relative;width:min(440px,90vw);padding:20px 22px;border-radius:18px;
+         background:#11151acc;backdrop-filter:blur(14px);border:1px solid #ffffff22;
+         box-shadow:0 0 0 1px #e3ec7822,0 0 30px #ee8cd622}
+  .etiquette{font-size:11px;letter-spacing:2px;color:#aaa;display:flex;align-items:center;gap:8px}
+  .etiquette i{width:7px;height:7px;border-radius:50%;background:#ff7a6b}
+  .ok .etiquette i{background:#9be27a}
+  h1{font-weight:400;font-size:18px;margin:10px 0 4px}
+  .gros{font-size:30px;font-weight:300;margin:6px 0}
+  p{color:#b9b9b9;font-size:14px;margin:6px 0 0;line-height:1.4}
+  form{display:flex;gap:8px;margin-top:16px}
+  input{flex:1;background:#0008;border:1px solid #ffffff22;color:#fff;border-radius:10px;padding:10px 12px;font-size:15px;outline:none}
+  input:focus{border-color:#ee8cd6}
+  button{background:linear-gradient(135deg,#e2ec78,#ee8cd6);border:0;color:#111;border-radius:10px;padding:10px 16px;font-size:15px;cursor:pointer;font-weight:600}
+  .pied{border-top:1px solid #ffffff15;margin-top:16px;padding-top:10px;font-size:12px;color:#777}
+  .cache{display:none}
+</style>
+</head>
+<body>
+<div class="scene"><div class="halo"></div><div class="orbe"></div></div>
+
+<div class="carte" id="carte">
+  <div class="etiquette"><i></i><span id="etiq"></span></div>
+  <h1 id="titre"></h1>
+  <div class="gros" id="gros"></div>
+  <p id="info"></p>
+  <form id="f" class="cache"><input id="adresse" spellcheck="false"><button>Connecter</button></form>
+  <div class="pied">F11 plein écran · F5 recharger · F2 changer l'adresse</div>
+</div>
+
+<script>
+  const q = new URLSearchParams(location.search);
+  const mode = q.get("mode") || "erreur"; // demarrage | erreur | reglage
+  const adresse = q.get("adresse") || "";
+  const $ = id => document.getElementById(id);
+  $("adresse").value = adresse;
+
+  if (mode === "demarrage") {
+    $("carte").classList.add("ok");
+    $("etiq").textContent = "DÉMARRAGE";
+    $("titre").textContent = "J.A.R.V.I.S.";
+    $("gros").textContent = "Initialisation…";
+    $("info").textContent = "Connexion à " + adresse;
+  } else if (mode === "reglage") {
+    $("etiq").textContent = "RÉGLAGES";
+    $("titre").textContent = "Adresse du serveur Jarvis";
+    $("f").classList.remove("cache");
+    $("adresse").focus();
+  } else {
+    document.body.classList.add("erreur");
+    $("etiq").textContent = "HORS LIGNE";
+    $("titre").textContent = "Serveur Jarvis injoignable";
+    $("info").textContent = adresse + " · " + (q.get("erreur") || "pas de réponse");
+    $("f").classList.remove("cache");
+    let n = 10;
+    const maj = () => $("gros").textContent = `Nouvel essai dans ${n} s`;
+    maj();
+    const t = setInterval(() => { n--; maj(); if (n <= 0) { clearInterval(t); jarvisApp.recharger(); } }, 1000);
+    $("adresse").addEventListener("focus", () => { clearInterval(t); $("gros").textContent = "En pause"; });
+  }
+
+  $("f").onsubmit = e => {
+    e.preventDefault();
+    jarvisApp.changerAdresse($("adresse").value.trim());
+  };
+</script>
+</body>
+</html>
